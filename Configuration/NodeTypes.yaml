@@ -1,0 +1,24 @@
+# Add stats tab to Document
+'TYPO3.Neos:Document':
+  ui:
+    inspector:
+      tabs:
+        stats:
+          label: 'Stats'
+          position: 100
+          icon: 'icon-bar-chart'
+      groups:
+        analytics:
+          label: 'Analytics'
+          position: 10
+          tab: 'stats'
+  properties:
+    googleAnalytics:
+      # This is a fake property, we don't store any value here
+      type: string
+      ui:
+        label: 'Google Analytics'
+        inspector:
+          group: 'analytics'
+          position: 10
+          editor: 'TYPO3.Neos.GoogleAnalytics/Inspector/Editors/AnalyticsView'

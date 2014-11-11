@@ -1,5 +1,6 @@
 jQuery(function($) {
 	$('#accounts').on('change', 'select[data-reload]', function() {
-		this.form.submit();
+		var prefix = window.location + (window.location.href.indexOf('?') > 0 ? '&' : '?');
+		window.location = prefix + this.name + '=' + this.value;
 	});
 });

@@ -1,0 +1,10 @@
+-
+  name: 'Analytics Data'
+  uriPattern: 'data'
+  defaults:
+    '@package':    'TYPO3.Neos.GoogleAnalytics'
+    '@controller': 'Data'
+    '@action':     'index'
+    '@format':     'json'
+  appendExceedingArguments: TRUE
+  httpMethods: ['GET']

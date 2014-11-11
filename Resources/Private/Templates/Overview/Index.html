@@ -1,4 +1,6 @@
-<f:form action="index" id="accounts">
+<f:form action="update" id="accounts">
+	<h1>Site {site.name}</h1>
+
 	<h2>Account</h2>
 	<f:form.select
 			name="accountId"
@@ -35,9 +37,12 @@
 			prependOptionValue=""
 			additionalAttributes="{data-reload: ''}" />
 
+		<f:form.hidden name="site" value="{site}" />
+		<p>
+		<f:form.submit value="Save" class="neos-button neos-button-primary" />
+		</p>
 	</f:if>
 
-	<f:form.submit value="Save" />
 </f:form>
 
 <script src="../../../Public/Module/Accounts.js"></script>

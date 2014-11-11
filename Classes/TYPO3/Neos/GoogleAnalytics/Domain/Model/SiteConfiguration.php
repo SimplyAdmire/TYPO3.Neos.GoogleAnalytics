@@ -25,7 +25,56 @@ class SiteConfiguration {
 	 */
 	protected $site;
 
-	protected $refreshToken;
+	/**
+	 * @var string
+	 */
+	protected $refreshToken = '';
 
+	/**
+	 * @var string
+	 */
 	protected $profileId;
+
+	/**
+	 * @return string
+	 */
+	public function getProfileId() {
+		return $this->profileId;
+	}
+
+	/**
+	 * @param string $profileId
+	 */
+	public function setProfileId($profileId) {
+		$this->profileId = $profileId;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getRefreshToken() {
+		return $this->refreshToken;
+	}
+
+	/**
+	 * @param string $refreshToken
+	 */
+	public function setRefreshToken($refreshToken) {
+		$this->refreshToken = $refreshToken;
+	}
+
+	/**
+	 * @return \TYPO3\Neos\Domain\Model\Site
+	 */
+	public function getSite() {
+		return $this->site;
+	}
+
+	/**
+	 * @param \TYPO3\Neos\Domain\Model\Site $site
+	 */
+	public function setSite($site) {
+		$this->site = $site;
+	}
+
 }

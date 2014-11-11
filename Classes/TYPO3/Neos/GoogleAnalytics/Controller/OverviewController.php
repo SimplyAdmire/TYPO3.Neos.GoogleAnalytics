@@ -12,8 +12,22 @@ namespace TYPO3\Neos\GoogleAnalytics\Controller;
  *                                                                            */
 
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Neos\Domain\Model\Site;
+use TYPO3\Neos\GoogleAnalytics\Domain\Model\SiteConfiguration;
 
 class OverviewController extends \TYPO3\Flow\Mvc\Controller\ActionController {
+
+	/**
+	 * @Flow\Inject
+	 * @var \TYPO3\Neos\Domain\Repository\SiteRepository
+	 */
+	protected $siteRepository;
+
+	/**
+	 * @Flow\Inject
+	 * @var \TYPO3\Neos\GoogleAnalytics\Domain\Repository\SiteConfigurationRepository
+	 */
+	protected $siteConfigurationRepository;
 
 	/**
 	 * @Flow\Inject
@@ -28,6 +42,9 @@ class OverviewController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 	 * @return void
 	 */
 	public function indexAction($accountId = '', $webpropertyId = '', $profileId = '') {
+		$site = $this->siteRepository->findFirst();
+		$this->view->assign('site', $site);
+
 		$analytics = $this->getAnalytics();
 		$client = $analytics->getClient();
 
@@ -53,6 +70,26 @@ class OverviewController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 		if ($accountId !== '' && $webpropertyId !== '' && $profileId !== '') {
 			$this->view->assign('profileId', $profileId);
 		}
+	}
+
+	/**
+	 * @param Site $site
+	 * @param string $profileId
+	 * @return void
+	 */
+	public function updateAction(Site $site, $profileId) {
+		$siteConfiguration = $this->siteConfigurationRepository->findOneBySite($site);
+		if ($siteConfiguration instanceof SiteConfiguration) {
+			$siteConfiguration->setProfileId($profileId);
+			$this->siteConfigurationRepository->update($siteConfiguration);
+		} else {
+			$siteConfiguration = new SiteConfiguration();
+			$siteConfiguration->setSite($site);
+			$siteConfiguration->setProfileId($profileId);
+			$this->siteConfigurationRepository->add($siteConfiguration);
+		}
+
+		$this->redirect('index');
 	}
 
 	/**

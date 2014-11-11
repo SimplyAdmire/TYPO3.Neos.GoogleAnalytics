@@ -1,6 +1,14 @@
 TYPO3:
   Neos:
 
+    userInterface:
+      requireJsPathMapping:
+        'TYPO3.Neos.GoogleAnalytics/Inspector/Editors': 'resource://TYPO3.Neos.GoogleAnalytics/Public/Scripts/Inspector/Editors'
+
+    typoScript:
+      autoInclude:
+        'TYPO3.Neos.GoogleAnalytics': TRUE
+
     modules:
       management:
         submodules:
@@ -14,3 +22,4 @@ TYPO3:
     GoogleAnalytics:
       # Configure the P12 key file location (relative to FLOW_PATH)
       keyFileResource: ~
+

@@ -5,9 +5,14 @@
 resources:
   methods:
     TYPO3_Neos_GoogleAnalytics_Module_Management_Overview: 'method(TYPO3\Neos\GoogleAnalytics\Controller\OverviewController->.*Action())'
+    TYPO3_Neos_GoogleAnalytics_Service_Data: 'method(TYPO3\Neos\GoogleAnalytics\Controller\DataController->.*Action())'
 
 acls:
 
   'TYPO3.Neos:Administrator':
     methods:
       TYPO3_Neos_GoogleAnalytics_Module_Management_Overview: GRANT
+
+  'Everybody':
+    methods:
+      TYPO3_Neos_GoogleAnalytics_Service_Data: GRANT

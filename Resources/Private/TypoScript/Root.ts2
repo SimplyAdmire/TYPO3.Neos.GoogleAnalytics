@@ -1,0 +1,20 @@
+prototype(TYPO3.Neos:Page) {
+	head.neosBackendEndpoints {
+		@process.typo3NeosGoogleAnalytics = TYPO3.TypoScript:Array {
+			1 = ${value}
+			2 = TYPO3.TypoScript:Tag {
+				tagName = 'link'
+				attributes {
+					rel = 'typo3-neos-googleanalytics-data'
+					href = TYPO3.TypoScript:UriBuilder {
+						action = 'index'
+						controller = 'Data'
+						package = 'TYPO3.Neos.GoogleAnalytics'
+						format = 'json'
+						absolute = true
+					}
+				}
+			}
+		}
+	}
+}
