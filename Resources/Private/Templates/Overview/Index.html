@@ -1,0 +1,43 @@
+<f:form action="index" id="accounts">
+	<h2>Account</h2>
+	<f:form.select
+			name="accountId"
+			value="{accountId}"
+			options="{accounts}"
+			optionValueField="id"
+			optionLabelField="name"
+			prependOptionLabel="Select account"
+			prependOptionValue=""
+			additionalAttributes="{data-reload: ''}" />
+
+	<f:if condition="{webproperties}">
+		<h2>Webproperty</h2>
+		<f:form.select
+			name="webpropertyId"
+			value="{webpropertyId}"
+			options="{webproperties}"
+			optionValueField="id"
+			optionLabelField="name"
+			prependOptionLabel="Select property"
+			prependOptionValue=""
+			additionalAttributes="{data-reload: ''}" />
+	</f:if>
+
+	<f:if condition="{profiles}">
+		<h2>Profile</h2>
+		<f:form.select
+			name="profileId"
+			value="{profileId}"
+			options="{profiles}"
+			optionValueField="id"
+			optionLabelField="name"
+			prependOptionLabel="Select profile"
+			prependOptionValue=""
+			additionalAttributes="{data-reload: ''}" />
+
+	</f:if>
+
+	<f:form.submit value="Save" />
+</f:form>
+
+<script src="../../../Public/Module/Accounts.js"></script>
