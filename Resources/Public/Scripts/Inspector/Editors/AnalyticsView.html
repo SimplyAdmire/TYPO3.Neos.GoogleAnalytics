@@ -1,5 +1,13 @@
-{{#if view.results}}
-	Pageviews: {{view.results.pageviews}}
+{{#if view.error}}
+	{{#if view.hasAuthenticationError}}
+		Authentication failed, please go to the <a href="/neos/management/googleAnalytics">Analytics module</a> to connect your Google account.
+	{{else}}
+		Error getting data from Google Analytics
+	{{/if}}
 {{else}}
-	Loading ...
+	{{#if view.results}}
+		Pageviews: {{view.results.pageviews}}
+	{{else}}
+		Loading ...
+	{{/if}}
 {{/if}}

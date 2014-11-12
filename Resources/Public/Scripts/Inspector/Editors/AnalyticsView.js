@@ -25,14 +25,22 @@ function(
 				{dataType: 'json'}
 			).then(
 				function(results) {
-					var data = {
-						pageviews: results['ga:pageviews']
-					};
+					if (results.error) {
+						that.set('error', results.error);
+					} else {
+						var data = {
 
-					that.set('results', data);
+							pageviews: results['ga:pageviews']
+						};
+						that.set('results', data);
+					}
 				}
 			);
 			return this._super();
-		}
+		},
+
+		hasAuthenticationError: function() {
+			return this.get('error.type') === 'AuthenticationRequiredException';
+		}.property('error')
 	});
 });

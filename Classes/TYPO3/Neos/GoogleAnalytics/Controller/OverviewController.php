@@ -103,17 +103,47 @@ class OverviewController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 		$code = $this->request->getHttpRequest()->getArgument('code');
 		if (!empty($code)) {
 			$client->authenticate($code);
+
 			$this->tokenStorage->storeAccessToken('global', $client->getAccessToken());
 			$this->tokenStorage->storeRefreshToken('global', $client->getRefreshToken());
 
 			$indexUri = $this->uriBuilder->reset()
 				->setCreateAbsoluteUri(TRUE)
 				->uriFor('index');
-			$this->redirectToUri($indexUri);
+			$this->redirectToUri($this->removeUriQueryArguments($indexUri));
+		}
+
+		// If we don't have a refresh token, require an approval prompt to receive a refresh token
+		$refreshToken = $this->tokenStorage->getRefreshToken('global');
+		if ($refreshToken === NULL) {
+			$client->setApprovalPrompt('force');
 		}
 
 		$authUrl = $client->createAuthUrl();
 		$this->view->assign('authUrl', $authUrl);
+	}
+
+	/**
+	 * @param array $errors
+	 * @return void
+	 */
+	public function apiErrorAction($errors) {
+		$this->view->assign('errors', $errors);
+	}
+
+	/**
+	 * Catch Google service exceptions and forward to the "apiError" action to show
+	 * an error message.
+	 *
+	 * @return void
+	 */
+	protected function callActionMethod() {
+		try {
+			parent::callActionMethod();
+		} catch (\Google_Service_Exception $exception) {
+			$errors = $exception->getErrors();
+			$this->forward('apiError', NULL, NULL, $errors);
+		}
 	}
 
 	/**

@@ -12,7 +12,10 @@ namespace TYPO3\Neos\GoogleAnalytics\Controller;
  *                                                                            */
 
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Neos\Domain\Model\Site;
 use TYPO3\Neos\GoogleAnalytics\Domain\Model\SiteConfiguration;
+use TYPO3\Neos\GoogleAnalytics\Exception\AuthenticationRequiredException;
+use TYPO3\Neos\GoogleAnalytics\Exception\Exception;
 use TYPO3\TYPO3CR\Domain\Model\NodeInterface;
 
 class DataController extends \TYPO3\Flow\Mvc\Controller\ActionController {
@@ -73,7 +76,7 @@ class DataController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 			// var_dump($filters);
 			// ob_flush();
 
-			$analytics = $this->getAnalytics();
+			$analytics = $this->getAnalytics($site);
 			$results = $analytics->data_ga->get(
 				'ga:' . $siteConfiguration->getProfileId(),
 				$startDate,
@@ -93,9 +96,33 @@ class DataController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 	}
 
 	/**
-	 * @return \Google_Service_Analytics
+	 * @return void
 	 */
-	protected function getAnalytics() {
+	protected function callActionMethod() {
+		try {
+			parent::callActionMethod();
+		} catch(\TYPO3\Neos\GoogleAnalytics\Exception $exception) {
+			$exceptionClassName = get_class($exception);
+			$exceptionData = array(
+				'error' => array(
+					'code' => $exception->getCode(),
+					'message' => $exception->getMessage(),
+					'type' => substr($exceptionClassName, strrpos($exceptionClassName, '\\') + 1),
+					// TODO See if that is really needed
+					'siteNodeName' => $exception->getSite()->getNodeName()
+				)
+			);
+			$this->response->setHeader('Content-Type', 'application/json');
+			$this->response->setContent(json_encode($exceptionData));
+		}
+	}
+
+	/**
+	 * @param Site $site
+	 * @return \Google_Service_Analytics
+	 * @throws AuthenticationRequiredException
+	 */
+	protected function getAnalytics(Site $site) {
 		$client = new \Google_Client();
 		// TODO Move that to settings, show information in module if not configured
 		$client->setApplicationName('TYPO3 Neos');
@@ -114,6 +141,8 @@ class DataController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 				$refreshToken = $this->tokenStorage->getRefreshToken('global');
 				$client->refreshToken($refreshToken);
 			}
+		} else {
+			throw new AuthenticationRequiredException('No access token', 1415783205, NULL, $site);
 		}
 
 		return new \Google_Service_Analytics($client);
