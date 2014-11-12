@@ -135,7 +135,7 @@ class OverviewController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 	 * @return void
 	 */
 	public function errorMessageAction() {
-
+		// TODO Add some way to reauthenticate / delete access tokens
 	}
 
 	/**
