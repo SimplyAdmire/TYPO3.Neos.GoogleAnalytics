@@ -14,6 +14,8 @@ namespace TYPO3\Neos\GoogleAnalytics\Controller;
 use TYPO3\Flow\Annotations as Flow;
 use TYPO3\Neos\Domain\Model\Site;
 use TYPO3\Neos\GoogleAnalytics\Domain\Model\SiteConfiguration;
+use TYPO3\Neos\GoogleAnalytics\Exception\AuthenticationRequiredException;
+use TYPO3\Neos\GoogleAnalytics\Exception\MissingConfigurationException;
 
 class OverviewController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 
@@ -36,6 +38,12 @@ class OverviewController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 	protected $tokenStorage;
 
 	/**
+	 * @Flow\Inject
+	 * @var \TYPO3\Neos\GoogleAnalytics\Service\GoogleAnalytics
+	 */
+	protected $googleAnalytics;
+
+	/**
 	 * @param string $accountId
 	 * @param string $webpropertyId
 	 * @param string $profileId
@@ -45,12 +53,7 @@ class OverviewController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 		$site = $this->siteRepository->findFirst();
 		$this->view->assign('site', $site);
 
-		$analytics = $this->getAnalytics();
-		$client = $analytics->getClient();
-
-		if (!$client->getAccessToken()) {
-			$this->redirect('authenticate');
-		}
+		$analytics = $this->googleAnalytics->getAnalytics();
 
 		$accounts = $this->getAccounts($analytics);
 		$this->view->assign('accounts', $accounts);
@@ -96,8 +99,13 @@ class OverviewController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 	 * @return void
 	 */
 	public function authenticateAction() {
-		$analytics = $this->getAnalytics();
+		$analytics = $this->googleAnalytics->getAnalytics(NULL, FALSE);
 		$client = $analytics->getClient();
+
+		$redirectUri = $this->uriBuilder->reset()
+			->setCreateAbsoluteUri(TRUE)
+			->uriFor('authenticate');
+		$client->setRedirectUri($this->removeUriQueryArguments($redirectUri));
 
 		// We have to get the "code" query argument without a module prefix
 		$code = $this->request->getHttpRequest()->getArgument('code');
@@ -124,11 +132,10 @@ class OverviewController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 	}
 
 	/**
-	 * @param array $errors
 	 * @return void
 	 */
-	public function apiErrorAction($errors) {
-		$this->view->assign('errors', $errors);
+	public function errorMessageAction() {
+
 	}
 
 	/**
@@ -141,8 +148,13 @@ class OverviewController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 		try {
 			parent::callActionMethod();
 		} catch (\Google_Service_Exception $exception) {
-			$errors = $exception->getErrors();
-			$this->forward('apiError', NULL, NULL, $errors);
+			$this->addFlashMessage('%1$s', 'Google API error', \TYPO3\Flow\Error\Message::SEVERITY_ERROR, array('message' => $exception->getMessage(), 1415797974));
+			$this->forward('errorMessage');
+		} catch (MissingConfigurationException $exception) {
+			$this->addFlashMessage('%1$s', 'Missing configuration', \TYPO3\Flow\Error\Message::SEVERITY_ERROR, array('message' => $exception->getMessage(), 1415797974));
+			$this->forward('errorMessage');
+		} catch (AuthenticationRequiredException $exception) {
+			$this->redirect('authenticate');
 		}
 	}
 
@@ -176,38 +188,6 @@ class OverviewController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 	protected function getProfiles($analytics, $accountId, $webpropertyId) {
 			$profiles = $analytics->management_profiles->listManagementProfiles($accountId, $webpropertyId);
 			return $profiles;
-	}
-
-	/**
-	 * @return \Google_Service_Analytics
-	 */
-	protected function getAnalytics() {
-		$client = new \Google_Client();
-		// TODO Move that to settings, show information in module if not configured
-		$client->setApplicationName('TYPO3 Neos');
-		$client->setClientId('488706292022-pdmhjba7tc9lnie3uh5t9ji9uakbp55a.apps.googleusercontent.com');
-		$client->setClientSecret('ERJQNB5zdfSV0YIzePh2Y_SZ');
-
-		$redirectUri = $this->uriBuilder->reset()
-			->setCreateAbsoluteUri(TRUE)
-			->uriFor('authenticate');
-		$client->setRedirectUri($this->removeUriQueryArguments($redirectUri));
-
-		$client->setDeveloperKey('AIzaSyA79k9lgMYYb1cpgdLLY0KvnE5OK0x593g');
-		$client->setScopes(array('https://www.googleapis.com/auth/analytics.readonly'));
-		$client->setAccessType('offline');
-
-		$accessToken = $this->tokenStorage->getAccessToken('global');
-		if ($accessToken !== NULL) {
-			$client->setAccessToken($accessToken);
-
-			if ($client->isAccessTokenExpired()) {
-				$refreshToken = $this->tokenStorage->getRefreshToken('global');
-				$client->refreshToken($refreshToken);
-			}
-		}
-
-		return new \Google_Service_Analytics($client);
 	}
 
 	/**

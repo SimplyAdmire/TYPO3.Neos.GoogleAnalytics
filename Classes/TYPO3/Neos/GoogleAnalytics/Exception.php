@@ -30,7 +30,7 @@ class Exception extends \TYPO3\Flow\Exception {
 	 * @param \Exception $previous
 	 * @param Site $site The site for the Google Analytics context
 	 */
-	public function __construct($message = '', $code = 0, \Exception $previous = NULL, Site $site) {
+	public function __construct($message = '', $code = 0, \Exception $previous = NULL, Site $site = NULL) {
 		parent::__construct($message, $code, $previous);
 		$this->site = $site;
 	}

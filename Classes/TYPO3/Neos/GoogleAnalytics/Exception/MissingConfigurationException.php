@@ -1,5 +1,5 @@
 <?php
-namespace TYPO3\Neos\GoogleAnalytics\Domain\Model;
+namespace TYPO3\Neos\GoogleAnalytics\Exception;
 
 /*                                                                            *
  * This script belongs to the TYPO3 Flow package "TYPO3.Neos.GoogleAnalytics" *
@@ -12,50 +12,11 @@ namespace TYPO3\Neos\GoogleAnalytics\Domain\Model;
  *                                                                            */
 
 use TYPO3\Flow\Annotations as Flow;
-use Doctrine\ORM\Mapping as ORM;
+use TYPO3\Neos\GoogleAnalytics\Exception;
 
 /**
- * @Flow\Entity
+ * Missing configuration for the Google Analytics package
  */
-class SiteConfiguration {
-
-	/**
-	 * @ORM\ManyToOne
-	 * @var \TYPO3\Neos\Domain\Model\Site
-	 */
-	protected $site;
-
-	/**
-	 * @var string
-	 */
-	protected $profileId;
-
-	/**
-	 * @return string
-	 */
-	public function getProfileId() {
-		return $this->profileId;
-	}
-
-	/**
-	 * @param string $profileId
-	 */
-	public function setProfileId($profileId) {
-		$this->profileId = $profileId;
-	}
-
-	/**
-	 * @return \TYPO3\Neos\Domain\Model\Site
-	 */
-	public function getSite() {
-		return $this->site;
-	}
-
-	/**
-	 * @param \TYPO3\Neos\Domain\Model\Site $site
-	 */
-	public function setSite($site) {
-		$this->site = $site;
-	}
+class MissingConfigurationException extends Exception {
 
 }

@@ -19,16 +19,14 @@ use TYPO3\Flow\Annotations as Flow;
 class TokenStorage {
 
 	/**
-	 * TODO Use a persistent and more secure storage (especially for refresh tokens)
-	 *
 	 * @Flow\Inject
-	 * @var \TYPO3\Flow\Cache\Frontend\VariableFrontend
+	 * @var \TYPO3\Flow\Cache\Frontend\StringFrontend
 	 */
 	protected $cache;
 
 	/**
 	 * @param string $identifier
-	 * @param mixed $accessToken
+	 * @param string $accessToken
 	 * @return void
 	 */
 	public function storeAccessToken($identifier, $accessToken) {
@@ -37,7 +35,7 @@ class TokenStorage {
 
 	/**
 	 * @param string $identifier
-	 * @param mixed $refreshToken
+	 * @param string $refreshToken
 	 * @return void
 	 */
 	public function storeRefreshToken($identifier, $refreshToken) {
@@ -46,7 +44,7 @@ class TokenStorage {
 
 	/**
 	 * @param string $identifier
-	 * @return mixed
+	 * @return string
 	 */
 	public function getAccessToken($identifier) {
 		$accessToken = $this->cache->get('AccessToken-' . md5($identifier));
@@ -58,7 +56,7 @@ class TokenStorage {
 
 	/**
 	 * @param string $identifier
-	 * @return mixed
+	 * @return string
 	 */
 	public function getRefreshToken($identifier) {
 		$accessToken = $this->cache->get('RefreshToken-' . md5($identifier));

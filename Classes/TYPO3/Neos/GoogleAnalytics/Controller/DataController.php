@@ -16,6 +16,7 @@ use TYPO3\Neos\Domain\Model\Site;
 use TYPO3\Neos\GoogleAnalytics\Domain\Model\SiteConfiguration;
 use TYPO3\Neos\GoogleAnalytics\Exception\AuthenticationRequiredException;
 use TYPO3\Neos\GoogleAnalytics\Exception\Exception;
+use TYPO3\Neos\GoogleAnalytics\Exception\MissingConfigurationException;
 use TYPO3\TYPO3CR\Domain\Model\NodeInterface;
 
 class DataController extends \TYPO3\Flow\Mvc\Controller\ActionController {
@@ -28,12 +29,6 @@ class DataController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 
 	/**
 	 * @Flow\Inject
-	 * @var \TYPO3\Neos\GoogleAnalytics\Service\TokenStorage
-	 */
-	protected $tokenStorage;
-
-	/**
-	 * @Flow\Inject
 	 * @var \TYPO3\Neos\Service\LinkingService
 	 */
 	protected $linkingService;
@@ -43,6 +38,12 @@ class DataController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 	 * @var \TYPO3\TYPO3CR\Domain\Service\ContextFactoryInterface
 	 */
 	protected $contextFactory;
+
+	/**
+	 * @Flow\Inject
+	 * @var \TYPO3\Neos\GoogleAnalytics\Service\GoogleAnalytics
+	 */
+	protected $googleAnalytics;
 
 	protected $supportedMediaTypes = array('application/json');
 
@@ -76,7 +77,7 @@ class DataController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 			// var_dump($filters);
 			// ob_flush();
 
-			$analytics = $this->getAnalytics($site);
+			$analytics = $this->googleAnalytics->getAnalytics($site);
 			$results = $analytics->data_ga->get(
 				'ga:' . $siteConfiguration->getProfileId(),
 				$startDate,
@@ -107,45 +108,16 @@ class DataController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 				'error' => array(
 					'code' => $exception->getCode(),
 					'message' => $exception->getMessage(),
-					'type' => substr($exceptionClassName, strrpos($exceptionClassName, '\\') + 1),
-					// TODO See if that is really needed
-					'siteNodeName' => $exception->getSite()->getNodeName()
+					'type' => substr($exceptionClassName, strrpos($exceptionClassName, '\\') + 1)
 				)
 			);
+			// TODO Check if we actually need the site
+			if ($exception->getSite() !== NULL) {
+				$exceptionData['error']['siteNodeName'] = $exception->getSite()->getNodeName();
+			}
 			$this->response->setHeader('Content-Type', 'application/json');
 			$this->response->setContent(json_encode($exceptionData));
 		}
-	}
-
-	/**
-	 * @param Site $site
-	 * @return \Google_Service_Analytics
-	 * @throws AuthenticationRequiredException
-	 */
-	protected function getAnalytics(Site $site) {
-		$client = new \Google_Client();
-		// TODO Move that to settings, show information in module if not configured
-		$client->setApplicationName('TYPO3 Neos');
-		$client->setClientId('488706292022-pdmhjba7tc9lnie3uh5t9ji9uakbp55a.apps.googleusercontent.com');
-		$client->setClientSecret('ERJQNB5zdfSV0YIzePh2Y_SZ');
-
-		$client->setDeveloperKey('AIzaSyA79k9lgMYYb1cpgdLLY0KvnE5OK0x593g');
-		$client->setScopes(array('https://www.googleapis.com/auth/analytics.readonly'));
-		$client->setAccessType('offline');
-
-		$accessToken = $this->tokenStorage->getAccessToken('global');
-		if ($accessToken !== NULL) {
-			$client->setAccessToken($accessToken);
-
-			if ($client->isAccessTokenExpired()) {
-				$refreshToken = $this->tokenStorage->getRefreshToken('global');
-				$client->refreshToken($refreshToken);
-			}
-		} else {
-			throw new AuthenticationRequiredException('No access token', 1415783205, NULL, $site);
-		}
-
-		return new \Google_Service_Analytics($client);
 	}
 
 	/**

@@ -20,6 +20,12 @@ TYPO3:
             resource: 'TYPO3_Neos_GoogleAnalytics_Module_Management_Overview'
 
     GoogleAnalytics:
-      # Configure the P12 key file location (relative to FLOW_PATH)
-      keyFileResource: ~
-
+      authentication:
+        # Application name for the consent screen
+        applicationName: 'TYPO3 Neos'
+        # Client ID of the webapplication OAuth 2.0 credential
+        clientId: ~
+        # Client secret of the webapplication OAuth 2.0 credential
+        clientSecret: ~
+        # Api Key of the Public API Access credential
+        developerKey: ~
