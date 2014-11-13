@@ -2,17 +2,27 @@
 # Security policy for the TYPO3 Neos GoogleAnalytics package             #
 #                                                                        #
 
-resources:
-  methods:
-    TYPO3_Neos_GoogleAnalytics_Module_Management_Overview: 'method(TYPO3\Neos\GoogleAnalytics\Controller\OverviewController->.*Action())'
-    TYPO3_Neos_GoogleAnalytics_Service_Data: 'method(TYPO3\Neos\GoogleAnalytics\Controller\DataController->.*Action())'
+privilegeTargets:
 
-acls:
+  'TYPO3\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
+
+    'TYPO3.Neos.GoogleAnalytics:Module.Management.Overview':
+      matcher: 'method(TYPO3\Neos\GoogleAnalytics\Controller\OverviewController->.*Action())'
+
+    'TYPO3.Neos.GoogleAnalytics:Service.Data':
+      matcher: 'method(TYPO3\Neos\GoogleAnalytics\Controller\DataController->.*Action())'
+
+
+roles:
 
   'TYPO3.Neos:Administrator':
-    methods:
-      TYPO3_Neos_GoogleAnalytics_Module_Management_Overview: GRANT
+    privileges:
+      -
+        privilegeTarget: 'TYPO3.Neos.GoogleAnalytics:Module.Management.Overview'
+        permission: GRANT
 
-  'Everybody':
-    methods:
-      TYPO3_Neos_GoogleAnalytics_Service_Data: GRANT
+  'TYPO3.Flow:Everybody':
+    privileges:
+      -
+        privilegeTarget: 'TYPO3.Neos.GoogleAnalytics:Service.Data'
+        permission: GRANT
