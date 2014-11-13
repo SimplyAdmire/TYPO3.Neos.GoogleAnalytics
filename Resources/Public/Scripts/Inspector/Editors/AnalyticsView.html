@@ -6,7 +6,53 @@
 	{{/if}}
 {{else}}
 	{{#if view.results}}
-		Pageviews: {{view.results.pageviews}}
+		<div class="neos-googleanalytics-daterange">
+			<span>{{view.startDateFormatted}}</span> - <span>{{view.endDateFormatted}}</span>
+		</div>
+		{{#if view.results.stats.basic}}
+			{{#with view.results.stats.basic}}
+			<div class="neos-googleanalytics-metric neos-googleanalytics-basic">
+				<table>
+					<tr>
+						<th>Pageviews</th><th>Sessions</th><th>Users</th>
+					</tr>
+					<tr>
+						<td class="neos-googleanalytics-pageviews">{{totals.ga_pageviews}}</td>
+						<td class="neos-googleanalytics-sessions">{{totals.ga_sessions}}</td>
+						<td class="neos-googleanalytics-users">{{totals.ga_users}}</td>
+					</tr>
+				</table>
+			</div>
+			{{/with}}
+		{{/if}}
+		{{#if view.results.stats.sessionsByDeviceCategory}}
+			<div class="neos-googleanalytics-metric neos-googleanalytics-devices">
+				<div>Devices</div>
+				<table>
+				{{#each view.results.stats.sessionsByDeviceCategory.rows}}
+					<tr>
+						<th>{{ga_deviceCategory}}</th><td>{{ga_sessions}}</td><td>{{numberformat percent}}%</td>
+					</tr>
+				{{/each}}
+				</table>
+			</div>
+		{{/if}}
+		{{#if view.results.stats.usersByUserType}}
+			<div class="neos-inspector-headline">Users by type</div>
+			<table class="neos-googleanalytics-table">
+			{{#each view.results.stats.usersByUserType.rows}}
+				<tr>
+					<th>{{ga_userType}}</th><td>{{ga_users}}</td>
+				</tr>
+			{{/each}}
+			</table>
+		{{/if}}
+		{{#if view.results.stats.loadTimes}}
+			<div class="neos-inspector-headline">Avg. page load</div>
+			<p>{{numberformat view.results.stats.loadTimes.totals.ga_avgPageLoadTime}}s</p>
+			<div class="neos-inspector-headline">Avg. server response time</div>
+			<p>{{numberformat view.results.stats.loadTimes.totals.ga_avgServerResponseTime}}s</p>
+		{{/if}}
 	{{else}}
 		Loading ...
 	{{/if}}

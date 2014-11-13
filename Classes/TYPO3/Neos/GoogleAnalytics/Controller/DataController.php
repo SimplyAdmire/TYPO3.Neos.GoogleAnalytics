@@ -23,24 +23,6 @@ class DataController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 
 	/**
 	 * @Flow\Inject
-	 * @var \TYPO3\Neos\GoogleAnalytics\Domain\Repository\SiteConfigurationRepository
-	 */
-	protected $siteConfigurationRepository;
-
-	/**
-	 * @Flow\Inject
-	 * @var \TYPO3\Neos\Service\LinkingService
-	 */
-	protected $linkingService;
-
-	/**
-	 * @Flow\Inject
-	 * @var \TYPO3\TYPO3CR\Domain\Service\ContextFactoryInterface
-	 */
-	protected $contextFactory;
-
-	/**
-	 * @Flow\Inject
 	 * @var \TYPO3\Neos\GoogleAnalytics\Service\GoogleAnalytics
 	 */
 	protected $googleAnalytics;
@@ -50,50 +32,22 @@ class DataController extends \TYPO3\Flow\Mvc\Controller\ActionController {
 	protected $viewFormatToObjectNameMap = array('json' => 'TYPO3\Flow\Mvc\View\JsonView');
 
 	/**
+	 * Get analytics stats for the given node
+	 *
 	 * @param NodeInterface $node
 	 * @return void
 	 */
 	public function indexAction(NodeInterface $node) {
-		$context = $node->getContext();
-		if (!$context instanceof \TYPO3\Neos\Domain\Service\ContentContext) {
-			throw new \InvalidArgumentException('Expected ContentContext', 1415722633);
-		}
-		$site = $context->getCurrentSite();
-		$siteConfiguration = $this->siteConfigurationRepository->findOneBySite($site);
-
-		if ($siteConfiguration instanceof SiteConfiguration) {
-			$startDate = (new \DateTime('3 months ago'))->format('Y-m-d');
-			$endDate = (new \DateTime())->format('Y-m-d');
-
-			$contextProperties = $node->getContext()->getProperties();
-			$contextProperties['workspaceName'] = 'live';
-			$liveContext = $this->contextFactory->create($contextProperties);
-			$liveNode = $liveContext->getNodeByIdentifier($node->getIdentifier());
-
-			$nodeUriString = $this->linkingService->createNodeUri($this->controllerContext, $liveNode, NULL, 'html', TRUE);
-			$nodeUri = new \TYPO3\Flow\Http\Uri($nodeUriString);
-
-			$filters = 'ga:pagePath==' . $nodeUri->getPath() . ';ga:hostname==' . $nodeUri->getHost();
-			// var_dump($filters);
-			// ob_flush();
-
-			$analytics = $this->googleAnalytics->getAnalytics($site);
-			$results = $analytics->data_ga->get(
-				'ga:' . $siteConfiguration->getProfileId(),
-				$startDate,
-				$endDate,
-				// TODO Add more metrics
-				'ga:pageviews',
-				array(
-					'filters' => $filters
-				)
-			);
-			$totals = $results->getTotalsForAllResults();
-			$this->view->assign('value', $totals);
-		} else {
-			// TODO Return different results depending on missing configuration or other errors
-			$this->view->assign('value', NULL);
-		}
+		$startDate = new \DateTime('3 months ago');
+		$endDate = new \DateTime();
+		$stats = $this->googleAnalytics->getStats($node, $this->controllerContext, $startDate, $endDate);
+		$this->response->setHeader('Content-Type', 'application/json');
+		$data = array(
+			'stats' => $stats,
+			'startDate' => $startDate->format(\DateTime::ISO8601),
+			'endDate' => $endDate->format(\DateTime::ISO8601),
+		);
+		return json_encode($data, JSON_PRETTY_PRINT);
 	}
 
 	/**

@@ -29,3 +29,15 @@ TYPO3:
         clientSecret: ~
         # Api Key of the Public API Access credential
         developerKey: ~
+
+      stats:
+        basic:
+          metrics: 'ga:pageviews,ga:sessions,ga:users'
+        usersByUserType:
+          metrics: 'ga:users'
+          dimensions: 'ga:userType'
+        sessionsByDeviceCategory:
+          metrics: 'ga:sessions'
+          dimensions: 'ga:deviceCategory'
+        loadTimes:
+          metrics: 'ga:avgPageLoadTime,ga:avgServerResponseTime'

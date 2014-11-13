@@ -17,6 +17,10 @@ function(
 		results: null,
 
 		init: function() {
+			Ember.Handlebars.helper('numberformat', function(value, options) {
+				return parseFloat(value).toFixed(2);
+			});
+
 			var that = this,
 				nodePath = InspectorController.nodeSelection.get('selectedNode.nodePath');
 
@@ -28,11 +32,7 @@ function(
 					if (results.error) {
 						that.set('error', results.error);
 					} else {
-						var data = {
-
-							pageviews: results['ga:pageviews']
-						};
-						that.set('results', data);
+						that.set('results', results);
 					}
 				}
 			);
@@ -41,6 +41,16 @@ function(
 
 		hasAuthenticationError: function() {
 			return this.get('error.type') === 'AuthenticationRequiredException';
-		}.property('error')
+		}.property('error'),
+
+		startDateFormatted: function() {
+			var d = new Date(this.get('results.startDate'));
+			return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()
+		}.property('results.startDate'),
+
+		endDateFormatted: function() {
+			var d = new Date(this.get('results.endDate'));
+			return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate()
+		}.property('results.endDate')
 	});
 });
