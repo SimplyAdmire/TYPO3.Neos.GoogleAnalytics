@@ -12,13 +12,58 @@
           label: 'Analytics'
           position: 10
           tab: 'stats'
-  properties:
-    googleAnalytics:
-      # This is a fake property, we don't store any value here
-      type: string
-      ui:
-        label: 'Google Analytics'
-        inspector:
+      views:
+        gaBasic:
+          label: 'Performance'
+          icon: 'icon-bar-chart'
+          group: 'analytics'
+          view: 'Content/Inspector/Views/Data/ColumnView'
+          viewOptions:
+            dataSource: 'GoogleAnalytics'
+            arguments:
+              stat: 'basic'
+            hero:
+              data: 'totals.ga_sessions'
+              label: 'Sessions'
+            columns:
+              -
+                data: 'totals.ga_pageviews'
+                label: 'Pageviews'
+              -
+                data: 'totals.ga_users'
+                label: 'Users'
+        gaSessionsByDeviceCategory:
+          label: 'Device categories'
+          icon: 'icon-bar-chart'
+          group: 'analytics'
+          view: 'Content/Inspector/Views/Data/TableView'
+          viewOptions:
+            dataSource: 'GoogleAnalytics'
+            arguments:
+              stat: 'sessionsByDeviceCategory'
+        gaSessionsByUserType:
+          label: 'User types'
+          icon: 'icon-bar-chart'
+          group: 'analytics'
+          view: 'Content/Inspector/Views/Data/TableView'
+          viewOptions:
+            dataSource: 'GoogleAnalytics'
+            arguments:
+              stat: 'sessionsByUserType'
+        gaSessionsPerDay:
+          label: 'Trend'
+          icon: 'icon-bar-chart'
           group: 'analytics'
           position: 10
-          editor: 'TYPO3.Neos.GoogleAnalytics/Inspector/Editors/AnalyticsView'
+          view: 'Content/Inspector/Views/Data/LineChartView'
+          viewOptions:
+            dataSource: 'GoogleAnalytics'
+            arguments:
+              stat: 'sessionsPerDay'
+
+        # gaSessionsByUserAge
+        # gaSessionsByGender
+        # gaSessionsByChannelGroup
+        # gaSessionsBySocialNetwork
+        # gaSessionsByUserAge
+        # gaTopReferrers

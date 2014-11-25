@@ -31,10 +31,13 @@ TYPO3:
         developerKey: ~
 
       stats:
+        sessionsPerDay:
+          metrics: 'ga:sessions'
+          dimensions: 'ga:date'
         basic:
           metrics: 'ga:pageviews,ga:sessions,ga:users'
-        usersByUserType:
-          metrics: 'ga:users'
+        sessionsByUserType:
+          metrics: 'ga:sessions'
           dimensions: 'ga:userType'
         sessionsByDeviceCategory:
           metrics: 'ga:sessions'

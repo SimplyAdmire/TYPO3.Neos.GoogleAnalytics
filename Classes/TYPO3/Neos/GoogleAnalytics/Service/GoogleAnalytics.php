@@ -105,8 +105,11 @@ class GoogleAnalytics {
 	}
 
 	/**
+	 * TODO Catch "(403) Access Not Configured" (e.g. IP does not match)
+	 *
 	 * @param \TYPO3\TYPO3CR\Domain\Model\NodeInterface $node
 	 * @param \TYPO3\Flow\Mvc\Controller\ControllerContext $controllerContext
+	 * @param string $statIdentifier
 	 * @param \DateTime $startDate
 	 * @param \DateTime $endDate
 	 * @throws AuthenticationRequiredException
@@ -114,7 +117,7 @@ class GoogleAnalytics {
 	 * @throws \TYPO3\Neos\Exception
 	 * @return array
 	 */
-	public function getStats(\TYPO3\TYPO3CR\Domain\Model\NodeInterface $node, \TYPO3\Flow\Mvc\Controller\ControllerContext $controllerContext, \DateTime $startDate, \DateTime $endDate) {
+	public function getStat(\TYPO3\TYPO3CR\Domain\Model\NodeInterface $node, \TYPO3\Flow\Mvc\Controller\ControllerContext $controllerContext, $statIdentifier, \DateTime $startDate, \DateTime $endDate) {
 		$context = $node->getContext();
 		if (!$context instanceof \TYPO3\Neos\Domain\Service\ContentContext) {
 			throw new \InvalidArgumentException('Expected ContentContext', 1415722633);
@@ -137,27 +140,27 @@ class GoogleAnalytics {
 			$nodeUriString = $this->linkingService->createNodeUri($controllerContext, $liveNode, NULL, 'html', TRUE);
 			$nodeUri = new \TYPO3\Flow\Http\Uri($nodeUriString);
 
-			// $hostname = $nodeUri->getHost();
-			$hostname = 'learn-neos.com';
-			// $path = $nodeUri->getPath();
-			$path = '/blog.html';
+			$hostname = $nodeUri->getHost();
+			$path = $nodeUri->getPath();
 
 			$filters = 'ga:pagePath==' . $path . ';ga:hostname==' . $hostname;
 
-			$results = array();
-
-			foreach ($this->statsSettings as $statName => $statConfiguration) {
-				$results[$statName] = new DataResult($analytics->data_ga->get(
-					'ga:' . $siteConfiguration->getProfileId(),
-					$startDateFormatted,
-					$endDateFormatted,
-					$statConfiguration['metrics'],
-					array(
-						'filters' => $filters,
-						'dimensions' => isset($statConfiguration['dimensions']) ? $statConfiguration['dimensions'] : ''
-					)
-				));
+			if (!isset($this->statsSettings[$statIdentifier])) {
+				throw new \InvalidArgumentException(sprintf('Unknown stat identifier "%s"', $statIdentifier), 1416917316);
 			}
+			$statConfiguration = $this->statsSettings[$statIdentifier];
+
+			$gaResult = $analytics->data_ga->get(
+				'ga:' . $siteConfiguration->getProfileId(),
+				$startDateFormatted,
+				$endDateFormatted,
+				$statConfiguration['metrics'],
+				array(
+					'filters' => $filters,
+					'dimensions' => isset($statConfiguration['dimensions']) ? $statConfiguration['dimensions'] : ''
+				)
+			);
+			$results = new DataResult($gaResult);
 
 			return $results;
 		} else {
