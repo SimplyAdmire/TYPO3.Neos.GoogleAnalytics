@@ -141,7 +141,7 @@ class ConfigurationController extends \TYPO3\Flow\Mvc\Controller\ActionControlle
 	 * @return void
 	 */
 	public function errorMessageAction() {
-		$authenticated = $this->analytics->getClient()->getAccessToken() !== NULL;
+		$authenticated = $this->analytics->getClient() !== NULL && $this->analytics->getClient()->getAccessToken() !== NULL;
 		$this->view->assign('authenticated', $authenticated);
 	}
 
